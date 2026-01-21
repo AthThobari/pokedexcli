@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
+	"strings"
+	"time"
 )
 
 // exit command
@@ -70,21 +73,58 @@ func commandMapBack(cfg *config) error {
 }
 
 func commandExplore(cfg *config) error {
-if cfg.currentArea == "" {
-return fmt.Errorf("you must provide a location area")
+	if len(cfg.args) == 0 {
+		return fmt.Errorf("you must provide a location area")
+	}
+
+	area := cfg.args[0]
+	cfg.currentArea = area
+
+	fmt.Printf("Exploring %s...\n", area)
+	fmt.Println("Found Pokemon:")
+
+	res, err := fetchLocationAreaDetail(area, cfg.Cache)
+	if err != nil {
+		return err
+	}
+
+	for _, p := range res.PokemonEncounters {
+		fmt.Printf("- %s\n", p.Pokemon.Name)
+	}
+
+	return nil
 }
 
-fmt.Printf("Exploring %s...\n", cfg.currentArea)
-fmt.Println("Found Pokemon:")
+func commandCatch(cfg *config) error {
+	// argument validation
+	if len(cfg.args) == 0 {
+		return fmt.Errorf("you must provide a pokemon name")
+	}
 
-res, err := fetchLocationAreaDetail(cfg.currentArea, cfg.Cache)
-if err != nil {
-return err
-}
+	name := strings.ToLower(cfg.args[0])
 
-for _, p := range res.PokemonEncounters {
-fmt.Printf("- %s\n", p.Pokemon.Name)
-}
+	fmt.Printf("Throwing a Pokeball at %s...\n", name)
 
-return nil
+	// fetch pokemon
+	pokemon, err := fetchPokemon(name, cfg.Cache)
+	if err != nil {
+		return err
+	}
+
+	// seed random (necessary)
+	rand.Seed(time.Now().UnixNano())
+
+	// logic chance
+	chance := rand.Intn(pokemon.BaseExperience + 1)
+
+	if chance > pokemon.BaseExperience/2 {
+		fmt.Printf("%s escaped!\n", pokemon.Name)
+		return nil
+	}
+
+	// successfully captured
+	fmt.Printf("%s was caught!\n", pokemon.Name)
+	cfg.Pokedex[pokemon.Name] = *pokemon
+
+	return nil
 }

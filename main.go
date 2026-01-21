@@ -17,7 +17,8 @@ func main() {
 
 	// inject to config
 	cfg := &config{
-		Cache: cache,
+		Cache:   cache,
+		Pokedex: make(map[string]Pokemon),
 	}
 
 	// Command registry
@@ -53,6 +54,12 @@ func main() {
 		callback:    commandExplore,
 	}
 
+	commands["catch"] = cliCommand{
+		name:        "catch",
+		description: "Catch a pokemon",
+		callback:    commandCatch,
+	}
+
 	// REPL loop
 	for {
 		fmt.Print("Pokedex > ")
@@ -66,12 +73,10 @@ func main() {
 
 		cmdName := words[0]
 
-		if cmdName == "explore" {
-			if len(words) < 2 {
-				fmt.Println("you must provide a location area")
-				continue
-			}
-			cfg.currentArea = words[1]
+		if len(words) > 1 {
+			cfg.args = words[1:]
+		} else {
+			cfg.args = nil
 		}
 
 		cmd, ok := commands[cmdName]

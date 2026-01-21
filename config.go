@@ -8,6 +8,10 @@ import (
 type config struct {
 	nextURL     *string
 	previousURL *string
-	Cache       *pokecache.Cache
 	currentArea string
+
+	args []string
+
+	Cache   *pokecache.Cache
+	Pokedex map[string]Pokemon
 }

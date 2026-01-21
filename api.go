@@ -27,6 +27,12 @@ type locationAreaDetail struct {
 	} `json:"pokemon_encounters"`
 }
 
+// Response structure from catch pokemon
+type Pokemon struct {
+	Name          string `json:"name"`
+	BaseExperience int    `json:"base_experience"`
+}
+
 // fetchLocationAreas fetches location-area data from URL
 func fetchLocationAreas(url string, cache *pokecache.Cache) (locationAreaResponse, error) {
 
@@ -83,4 +89,46 @@ func fetchLocationAreaDetail(
 	var result locationAreaDetail
 	json.Unmarshal(body, &result)
 	return &result, nil
+}
+
+func fetchPokemon(name string, cache *pokecache.Cache) (*Pokemon, error) {
+	url := "https://pokeapi.co/api/v2/pokemon/" + name
+
+	// Check cache first
+	if data, ok := cache.Get(url); ok {
+		var pokemon Pokemon
+		if err := json.Unmarshal(data, &pokemon); err != nil {
+			return nil, err
+		}
+		return &pokemon, nil
+	}
+
+	//If it's not in the cache, make an HTTP request.
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Validate status code
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("pokemon not found")
+	}
+
+	// Read the body response
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// Save to cache
+	cache.Add(url, body)
+
+	// Decode JSON to struct Pokemon
+	var pokemon Pokemon
+	if err := json.Unmarshal(body, &pokemon); err != nil {
+		return nil, err
+	}
+
+	return &pokemon, nil
 }
