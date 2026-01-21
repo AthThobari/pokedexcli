@@ -47,6 +47,12 @@ func main() {
 		callback:    commandHelp(commands),
 	}
 
+	commands["explore"] = cliCommand{
+		name:        "explore",
+		description: "Explore a location area",
+		callback:    commandExplore,
+	}
+
 	// REPL loop
 	for {
 		fmt.Print("Pokedex > ")
@@ -59,6 +65,15 @@ func main() {
 		}
 
 		cmdName := words[0]
+
+		if cmdName == "explore" {
+			if len(words) < 2 {
+				fmt.Println("you must provide a location area")
+				continue
+			}
+			cfg.currentArea = words[1]
+		}
+
 		cmd, ok := commands[cmdName]
 		if !ok {
 			fmt.Println("Unknown command")

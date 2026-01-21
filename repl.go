@@ -68,3 +68,23 @@ func commandMapBack(cfg *config) error {
 	cfg.previousURL = data.Previous
 	return nil
 }
+
+func commandExplore(cfg *config) error {
+if cfg.currentArea == "" {
+return fmt.Errorf("you must provide a location area")
+}
+
+fmt.Printf("Exploring %s...\n", cfg.currentArea)
+fmt.Println("Found Pokemon:")
+
+res, err := fetchLocationAreaDetail(cfg.currentArea, cfg.Cache)
+if err != nil {
+return err
+}
+
+for _, p := range res.PokemonEncounters {
+fmt.Printf("- %s\n", p.Pokemon.Name)
+}
+
+return nil
+}
