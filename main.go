@@ -60,6 +60,18 @@ func main() {
 		callback:    commandCatch,
 	}
 
+	commands["inspect"] = cliCommand{
+		name:        "inspect",
+		description: "Inspect a caught pokemon",
+		callback:    commandInspect,
+	}
+
+commands["pokedex"] = cliCommand{
+name: "pokedex",
+description: "List all caught pokemon",
+callback: commandPokedex,
+}
+
 	// REPL loop
 	for {
 		fmt.Print("Pokedex > ")

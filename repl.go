@@ -128,3 +128,50 @@ func commandCatch(cfg *config) error {
 
 	return nil
 }
+
+func commandInspect(cfg *config) error {
+	// argumen validation
+	if len(cfg.args) == 0 {
+		return fmt.Errorf("you must provide a pokemon name")
+	}
+
+	name := strings.ToLower(cfg.args[0])
+
+	// check is pokemon already captured
+	pokemon, ok := cfg.Pokedex[name]
+	if !ok {
+		fmt.Println("you have not caught that pokemon")
+		return nil
+	}
+
+	// display info
+	fmt.Printf("Name: %s\n", pokemon.Name)
+	fmt.Printf("Height: %d\n", pokemon.Height)
+	fmt.Printf("Weight: %d\n", pokemon.Weight)
+
+	fmt.Println("Stats:")
+	for _, stat := range pokemon.Stats {
+		fmt.Printf(" -%s: %d\n", stat.Stat.Name, stat.BaseStat)
+	}
+
+	fmt.Println("Types:")
+	for _, t := range pokemon.Types {
+		fmt.Printf(" - %s\n", t.Type.Name)
+	}
+
+	return nil
+}
+
+func commandPokedex(cfg *config) error {
+	if len(cfg.Pokedex) == 0 {
+		fmt.Println("Your Pokedex is empty.")
+		return nil
+	}
+
+	fmt.Println("Your Pokedex:")
+	for name := range cfg.Pokedex {
+		fmt.Printf(" - %s\n", name)
+	}
+
+	return nil
+}
